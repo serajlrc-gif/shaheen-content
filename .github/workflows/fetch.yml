@@ -1,0 +1,24 @@
+name: fetch-audio
+on:
+  push:
+    paths: ['vo/fetch.txt']
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download files listed in vo/fetch.txt
+        run: |
+          while read -r name url; do
+            [ -z "$name" ] && continue
+            curl -fsSL -o "vo/$name" "$url"
+          done < vo/fetch.txt
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add vo
+          git commit -m "Add fetched audio" || exit 0
+          git push
